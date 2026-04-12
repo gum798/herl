@@ -16,14 +16,16 @@ import { ChatInput } from '@/src/components/ChatInput';
 import { StreamingBubble } from '@/src/components/StreamingBubble';
 import { ModelDownloadBanner } from '@/src/components/ModelDownloadBanner';
 import { useLLM } from '@/src/hooks/useLLM';
+import { useVoiceRecorder } from '@/src/hooks/useVoiceRecorder';
 import { useChatStore } from '@/src/stores/chatStore';
 import { useSettingsStore } from '@/src/stores/settingsStore';
 import type { ChatMessage } from '@/src/types';
 
 export default function ChatScreen() {
-  const { messages, voiceState, setVoiceState } = useChatStore();
+  const { messages } = useChatStore();
   const { companionName } = useSettingsStore();
   const { sendMessage, stop, streamingText, isGenerating } = useLLM();
+  const { voiceState, toggleRecording } = useVoiceRecorder();
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -103,8 +105,7 @@ export default function ChatScreen() {
                 stop();
                 return;
               }
-              // TODO: Step 3 - Voice recording pipeline
-              setVoiceState(voiceState === 'idle' ? 'recording' : 'idle');
+              toggleRecording();
             }}
           />
           <ChatInput onSend={handleSendText} />
