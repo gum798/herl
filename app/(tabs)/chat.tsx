@@ -7,7 +7,9 @@ import {
   Platform,
   SafeAreaView,
   Text,
+  Pressable,
 } from 'react-native';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { StatusBar } from 'expo-status-bar';
 
 import { ChatBubble } from '@/src/components/ChatBubble';
@@ -17,6 +19,8 @@ import { StreamingBubble } from '@/src/components/StreamingBubble';
 import { ModelDownloadBanner } from '@/src/components/ModelDownloadBanner';
 import { useLLM } from '@/src/hooks/useLLM';
 import { useVoiceRecorder } from '@/src/hooks/useVoiceRecorder';
+import { useCamera } from '@/src/hooks/useCamera';
+import { CameraViewComponent } from '@/src/components/CameraView';
 import { useChatStore } from '@/src/stores/chatStore';
 import { useSettingsStore } from '@/src/stores/settingsStore';
 import type { ChatMessage } from '@/src/types';
@@ -26,6 +30,10 @@ export default function ChatScreen() {
   const { companionName } = useSettingsStore();
   const { sendMessage, stop, streamingText, isGenerating } = useLLM();
   const { voiceState, toggleRecording } = useVoiceRecorder();
+  const {
+    cameraRef, isCameraOpen, facing,
+    openCamera, closeCamera, toggleFacing, captureAndClose,
+  } = useCamera();
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -39,10 +47,16 @@ export default function ChatScreen() {
   }, [sendMessage]);
 
   const handleModelDownload = useCallback(() => {
-    // TODO: Trigger model download flow
-    // For now, show alert that models need to be downloaded
     console.log('Model download requested');
   }, []);
+
+  const handleCameraCapture = useCallback(async () => {
+    const result = await captureAndClose();
+    if (result) {
+      // Send image with a prompt to LLM
+      sendMessage('이 사진에 대해 설명해줘', result.uri);
+    }
+  }, [captureAndClose, sendMessage]);
 
   const renderMessage = ({ item }: { item: ChatMessage }) => (
     <ChatBubble message={item} />
@@ -61,6 +75,17 @@ export default function ChatScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="light" />
+
+      {/* Camera overlay */}
+      {isCameraOpen && (
+        <CameraViewComponent
+          cameraRef={cameraRef}
+          facing={facing}
+          onCapture={handleCameraCapture}
+          onClose={closeCamera}
+          onFlip={toggleFacing}
+        />
+      )}
 
       {/* Header */}
       <View style={styles.header}>
@@ -109,6 +134,9 @@ export default function ChatScreen() {
             }}
           />
           <ChatInput onSend={handleSendText} />
+          <Pressable onPress={openCamera} style={styles.cameraButton}>
+            <FontAwesome name="camera" size={18} color="#8888aa" />
+          </Pressable>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -176,5 +204,13 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: 'center',
     lineHeight: 22,
+  },
+  cameraButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginLeft: 8,
   },
 });
