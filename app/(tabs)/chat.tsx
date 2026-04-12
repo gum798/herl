@@ -1,0 +1,179 @@
+import React, { useRef, useEffect, useCallback } from 'react';
+import {
+  StyleSheet,
+  View,
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  Text,
+} from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+
+import { ChatBubble } from '@/src/components/ChatBubble';
+import { VoiceButton } from '@/src/components/VoiceButton';
+import { ChatInput } from '@/src/components/ChatInput';
+import { StreamingBubble } from '@/src/components/StreamingBubble';
+import { ModelDownloadBanner } from '@/src/components/ModelDownloadBanner';
+import { useLLM } from '@/src/hooks/useLLM';
+import { useChatStore } from '@/src/stores/chatStore';
+import { useSettingsStore } from '@/src/stores/settingsStore';
+import type { ChatMessage } from '@/src/types';
+
+export default function ChatScreen() {
+  const { messages, voiceState, setVoiceState } = useChatStore();
+  const { companionName } = useSettingsStore();
+  const { sendMessage, stop, streamingText, isGenerating } = useLLM();
+  const flatListRef = useRef<FlatList>(null);
+
+  useEffect(() => {
+    if (messages.length > 0 || streamingText) {
+      setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
+    }
+  }, [messages.length, streamingText]);
+
+  const handleSendText = useCallback((text: string) => {
+    sendMessage(text);
+  }, [sendMessage]);
+
+  const handleModelDownload = useCallback(() => {
+    // TODO: Trigger model download flow
+    // For now, show alert that models need to be downloaded
+    console.log('Model download requested');
+  }, []);
+
+  const renderMessage = ({ item }: { item: ChatMessage }) => (
+    <ChatBubble message={item} />
+  );
+
+  const renderFooter = () => {
+    if (!isGenerating) return null;
+    return (
+      <StreamingBubble
+        text={streamingText}
+        isThinking={isGenerating && !streamingText}
+      />
+    );
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="light" />
+
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerDot} />
+        <Text style={styles.headerTitle}>{companionName}</Text>
+      </View>
+
+      {/* Model download banner */}
+      <ModelDownloadBanner onDownload={handleModelDownload} />
+
+      {/* Messages */}
+      <FlatList
+        ref={flatListRef}
+        data={messages}
+        renderItem={renderMessage}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.messageList}
+        showsVerticalScrollIndicator={false}
+        ListFooterComponent={renderFooter}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyEmoji}>{'  '}</Text>
+            <Text style={styles.emptyTitle}>Hi, I'm {companionName}</Text>
+            <Text style={styles.emptySubtext}>
+              Talk to me about anything.{'\n'}
+              I'm here to listen and help.
+            </Text>
+          </View>
+        }
+      />
+
+      {/* Input Area */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={90}
+      >
+        <View style={styles.inputArea}>
+          <VoiceButton
+            voiceState={voiceState}
+            onPress={() => {
+              if (isGenerating) {
+                stop();
+                return;
+              }
+              // TODO: Step 3 - Voice recording pipeline
+              setVoiceState(voiceState === 'idle' ? 'recording' : 'idle');
+            }}
+          />
+          <ChatInput onSend={handleSendText} />
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#1a1a2e',
+  },
+  header: {
+    alignItems: 'center',
+    paddingVertical: 12,
+    gap: 6,
+  },
+  headerDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#e94560',
+    shadowColor: '#e94560',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 8,
+  },
+  headerTitle: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  messageList: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    flexGrow: 1,
+  },
+  inputArea: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#2a2a4e',
+    backgroundColor: '#16213e',
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 120,
+  },
+  emptyEmoji: {
+    fontSize: 48,
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    color: '#ffffff',
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  emptySubtext: {
+    color: '#8888aa',
+    fontSize: 15,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+});

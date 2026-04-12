@@ -1,33 +1,37 @@
 {
   "expo": {
-    "name": "herl-app",
-    "slug": "herl-app",
-    "version": "1.0.0",
+    "name": "HERL",
+    "slug": "herl",
+    "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "herlapp",
+    "scheme": "herl",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#1a1a2e"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.herl.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "HERL needs microphone access for voice conversations.",
+        "NSCameraUsageDescription": "HERL uses camera to understand your surroundings.",
+        "NSSpeechRecognitionUsageDescription": "HERL uses speech recognition for voice input."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#1a1a2e"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "package": "com.herl.app",
+      "permissions": [
+        "RECORD_AUDIO",
+        "CAMERA"
+      ]
     },
     "plugins": [
       "expo-router"
