@@ -73,10 +73,12 @@ export async function downloadLLMModel(): Promise<string> {
   const { modelId } = store.deviceCapability;
   const destFile = getModelFile(modelId);
 
-  // TODO: Replace with actual model URLs when models are hosted
+  // Actual model URLs (Korean-optimized)
+  // High: EXAONE 3.5 2.4B (LG, 한국어 최적화) - 1.64GB
+  // Low: Qwen2.5 1.5B (다국어, 한국어 양호) - 1.12GB
   const modelUrls: Record<string, string> = {
-    'e4b-q4': 'https://huggingface.co/TODO/e4b-q4-km.gguf',
-    'e2b-q4': 'https://huggingface.co/TODO/e2b-q4-km.gguf',
+    'exaone-2.4b-q4': 'https://huggingface.co/LGAI-EXAONE/EXAONE-3.5-2.4B-Instruct-GGUF/resolve/main/EXAONE-3.5-2.4B-Instruct-Q4_K_M.gguf',
+    'qwen2.5-1.5b-q4': 'https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf',
   };
 
   const url = modelUrls[modelId];
@@ -106,10 +108,12 @@ export async function downloadWhisperModel(): Promise<string> {
   const { whisperModel } = store.deviceCapability;
   const destFile = getWhisperModelFile(whisperModel);
 
+  // Whisper models (multilingual, NOT .en variants - Korean needs multilingual)
   const whisperUrls: Record<string, string> = {
+    'small-q5_1': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q5_1.bin',
     'small': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin',
-    'tiny': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin',
     'base': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin',
+    'tiny': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin',
   };
 
   const url = whisperUrls[whisperModel];

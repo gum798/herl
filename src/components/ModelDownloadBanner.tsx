@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, Pressable, ActivityIndicator } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useModelStore } from '../stores/modelStore';
+import { MODEL_INFO } from '../utils/deviceCapability';
 
 interface ModelDownloadBannerProps {
   onDownload: () => void;
@@ -14,13 +15,17 @@ export function ModelDownloadBanner({ onDownload }: ModelDownloadBannerProps) {
 
   const getStatusContent = () => {
     switch (llmStatus) {
-      case 'not_downloaded':
+      case 'not_downloaded': {
+        const info = MODEL_INFO[deviceCapability.modelId];
         return {
           icon: 'download' as const,
           title: 'AI Model Required',
-          subtitle: `${deviceCapability.modelId} (${deviceCapability.tier === 'high' ? '~4GB' : '~1.5GB'})`,
+          subtitle: info
+            ? `${info.name} (${info.sizeGB}GB) - ${info.desc}`
+            : `${deviceCapability.modelId}`,
           showButton: true,
         };
+      }
       case 'downloading':
         return {
           icon: 'cloud-download' as const,
