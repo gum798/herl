@@ -16,7 +16,7 @@ export default {
   // Chat
   chatPlaceholder: '메시지를 입력하세요...',
   chatEmpty: '안녕, 나는 {{name}}이야',
-  chatEmptySubtext: '무엇이든 이야기해봐.\n듣고 도와줄게.',
+  chatEmptySubtext: '무엇이든 이야기해봐.\n항상 곁에 있을게.',
   chatLlmNotLoaded: '[LLM 미로드] "{{text}}" - 모델을 먼저 다운로드해주세요.',
   chatError: '죄송해요, 응답을 생성하는 중에 문제가 생겼어요. 다시 시도해주시겠어요?',
   chatDescribePhoto: '이 사진에 대해 설명해줘',

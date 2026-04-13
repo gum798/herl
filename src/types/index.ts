@@ -52,7 +52,7 @@ export interface UserSettings {
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
-  companionName: 'Herl',
+  companionName: '헐',
   ttsVoice: 'default',
   ttsRate: 0.5,
   ttsPitch: 1.0,
