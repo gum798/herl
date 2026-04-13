@@ -1,4 +1,4 @@
-import { Paths, File, Directory } from 'expo-file-system';
+import { Paths, File as ExpoFile, Directory } from 'expo-file-system';
 import { useModelStore } from '../stores/modelStore';
 
 /** Models directory inside document storage */
@@ -16,53 +16,47 @@ function ensureModelDir(): void {
 
 /** Get the local file path for an LLM model */
 export function getModelPath(modelId: string): string {
-  return new File(getModelDir(), `${modelId}.gguf`).uri;
+  return new ExpoFile(getModelDir(), `${modelId}.gguf`).uri;
 }
 
 /** Get the local file for an LLM model */
-export function getModelFile(modelId: string): File {
-  return new File(getModelDir(), `${modelId}.gguf`);
+export function getModelFile(modelId: string): ExpoFile {
+  return new ExpoFile(getModelDir(), `${modelId}.gguf`);
 }
 
 /** Get the local file path for whisper model */
 export function getWhisperModelPath(modelSize: string): string {
-  return new File(getModelDir(), `ggml-${modelSize}.bin`).uri;
+  return new ExpoFile(getModelDir(), `ggml-${modelSize}.bin`).uri;
 }
 
 /** Get the local file for whisper model */
-export function getWhisperModelFile(modelSize: string): File {
-  return new File(getModelDir(), `ggml-${modelSize}.bin`);
+export function getWhisperModelFile(modelSize: string): ExpoFile {
+  return new ExpoFile(getModelDir(), `ggml-${modelSize}.bin`);
 }
 
 /** Check if a model file is already downloaded */
-export function isModelDownloaded(file: File): boolean {
+export function isModelDownloaded(file: ExpoFile): boolean {
   return file.exists;
 }
 
 /**
  * Download a model file.
- * Returns the File object on success.
- *
- * NOTE: expo-file-system new API doesn't support progress callbacks natively.
- * For large model downloads, consider using a background download library.
  */
-export async function downloadModelFile(
+export async function downloadModel(
   url: string,
-  destFile: File,
-): Promise<File> {
+  destFile: ExpoFile,
+): Promise<ExpoFile> {
   ensureModelDir();
 
-  // Check if already downloaded
   if (destFile.exists) {
     return destFile;
   }
 
-  // Download to model directory
-  const downloaded = await File.downloadFileAsync(url, destFile, {
+  const downloaded = await ExpoFile.downloadFileAsync(url, destFile, {
     idempotent: true,
   });
 
-  return downloaded;
+  return downloaded as unknown as ExpoFile;
 }
 
 /**
@@ -73,12 +67,10 @@ export async function downloadLLMModel(): Promise<string> {
   const { modelId } = store.deviceCapability;
   const destFile = getModelFile(modelId);
 
-  // Actual model URLs (Korean-optimized)
-  // High: EXAONE 3.5 2.4B (LG, 한국어 최적화) - 1.64GB
-  // Low: Qwen2.5 1.5B (다국어, 한국어 양호) - 1.12GB
+  // Gemma 4 E4B/E2B (Google, 140+ 언어, Apache 2.0)
   const modelUrls: Record<string, string> = {
-    'exaone-2.4b-q4': 'https://huggingface.co/LGAI-EXAONE/EXAONE-3.5-2.4B-Instruct-GGUF/resolve/main/EXAONE-3.5-2.4B-Instruct-Q4_K_M.gguf',
-    'qwen2.5-1.5b-q4': 'https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/main/qwen2.5-1.5b-instruct-q4_k_m.gguf',
+    'gemma4-e4b-q4': 'https://huggingface.co/bartowski/google_gemma-4-E4B-it-GGUF/resolve/main/gemma-4-E4B-it-Q4_K_M.gguf',
+    'gemma4-e2b-q4': 'https://huggingface.co/bartowski/google_gemma-4-E2B-it-GGUF/resolve/main/gemma-4-E2B-it-Q4_K_M.gguf',
   };
 
   const url = modelUrls[modelId];
@@ -90,9 +82,9 @@ export async function downloadLLMModel(): Promise<string> {
   store.setLLMProgress(0);
 
   try {
-    const file = await downloadModelFile(url, destFile);
+    const file = await downloadModel(url, destFile);
     store.setLLMProgress(100);
-    store.setLLMStatus('not_downloaded'); // Will be set to 'ready' after initLlama
+    store.setLLMStatus('not_downloaded');
     return file.uri;
   } catch (error) {
     store.setLLMStatus('error');
@@ -108,7 +100,6 @@ export async function downloadWhisperModel(): Promise<string> {
   const { whisperModel } = store.deviceCapability;
   const destFile = getWhisperModelFile(whisperModel);
 
-  // Whisper models (multilingual, NOT .en variants - Korean needs multilingual)
   const whisperUrls: Record<string, string> = {
     'small-q5_1': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q5_1.bin',
     'small': 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin',
@@ -125,7 +116,7 @@ export async function downloadWhisperModel(): Promise<string> {
   store.setWhisperProgress(0);
 
   try {
-    const file = await downloadModelFile(url, destFile);
+    const file = await downloadModel(url, destFile);
     store.setWhisperProgress(100);
     store.setWhisperStatus('not_downloaded');
     return file.uri;
@@ -135,9 +126,7 @@ export async function downloadWhisperModel(): Promise<string> {
   }
 }
 
-/**
- * Delete all downloaded models.
- */
+/** Delete all downloaded models */
 export function clearModels(): void {
   const dir = getModelDir();
   if (dir.exists) {
@@ -145,9 +134,7 @@ export function clearModels(): void {
   }
 }
 
-/**
- * Get total size of downloaded models in bytes.
- */
+/** Get total size of downloaded models in bytes */
 export function getModelsSize(): number {
   const dir = getModelDir();
   if (!dir.exists) return 0;

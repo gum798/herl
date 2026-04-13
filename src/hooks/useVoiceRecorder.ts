@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import { Audio } from 'expo-av';
-import { Paths, File } from 'expo-file-system';
+import { File as ExpoFile } from 'expo-file-system';
 import { useChatStore } from '../stores/chatStore';
 import { transcribeAudio, isWhisperReady } from '../services/whisper';
 import { speak, stopSpeech } from '../services/tts';
@@ -141,7 +141,7 @@ export function useVoiceRecorder() {
 
       // Clean up recording file
       try {
-        const recordingFile = new File(uri);
+        const recordingFile = new ExpoFile(uri);
         if (recordingFile.exists) {
           recordingFile.delete();
         }

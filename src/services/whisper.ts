@@ -1,6 +1,5 @@
 import { initWhisper, type WhisperContext } from 'whisper.rn';
 import { useModelStore } from '../stores/modelStore';
-import { getWhisperModelFile } from '../utils/modelDownloader';
 
 let whisperContext: WhisperContext | null = null;
 

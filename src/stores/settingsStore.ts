@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { UserSettings } from '../types';
 import { DEFAULT_SETTINGS } from '../types';
+export type { UserSettings };
 
 interface SettingsState extends UserSettings {
   updateSetting: <K extends keyof UserSettings>(key: K, value: UserSettings[K]) => void;

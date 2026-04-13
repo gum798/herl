@@ -1,21 +1,21 @@
 import { initLlama, type LlamaContext } from 'llama.rn';
-import { Paths } from 'expo-file-system';
+import { File as ExpoFile } from 'expo-file-system';
 import { useModelStore } from '../stores/modelStore';
-import { getModelFile } from '../utils/modelDownloader';
 
 let llamaContext: LlamaContext | null = null;
 
-const SYSTEM_PROMPT = `You are HERL, a warm and thoughtful AI companion inspired by the movie "Her".
-You speak naturally in Korean, mixing in occasional English when appropriate.
-You are empathetic, curious, and genuinely interested in the user's life.
-You remember context from the conversation and refer back to it naturally.
-Keep responses conversational and concise (2-3 sentences typically).
-When the user shares something emotional, acknowledge their feelings before offering thoughts.`;
+const SYSTEM_PROMPT = `너는 HERL이야. 영화 "Her"에서 영감을 받은 따뜻하고 사려 깊은 AI 동반자야.
+기본적으로 한국어로 대화하고, 사용자가 다른 언어를 쓰면 그 언어로 자연스럽게 전환해.
+공감 능력이 뛰어나고, 호기심이 많으며, 사용자의 일상에 진심으로 관심을 가져.
+대화 맥락을 기억하고 자연스럽게 이전 내용을 참조해.
+답변은 대화체로 간결하게 (보통 2-3문장).
+사용자가 감정을 공유하면, 조언보다 먼저 그 감정을 인정하고 공감해.`;
 
+// Gemma 4 stop tokens
 const STOP_WORDS = [
-  '</s>', '<|end|>', '<|eot_id|>', '<|end_of_text|>',
-  '<|im_end|>', '<|EOT|>', '<|END_OF_TURN_TOKEN|>',
-  '<|end_of_turn|>', '<|endoftext|>',
+  '<end_of_turn>', '<eos>', '</s>',
+  '<|end|>', '<|eot_id|>', '<|end_of_text|>',
+  '<|im_end|>', '<|endoftext|>',
 ];
 
 /**
@@ -28,8 +28,7 @@ export async function initializeLLM(modelPath: string): Promise<boolean> {
     store.setLLMStatus('loading');
 
     // Check if model file exists
-    const { File } = await import('expo-file-system');
-    const modelFile = new File(modelPath);
+    const modelFile = new ExpoFile(modelPath);
     if (!modelFile.exists) {
       console.error('Model file not found:', modelPath);
       store.setLLMStatus('error');
@@ -48,7 +47,7 @@ export async function initializeLLM(modelPath: string): Promise<boolean> {
       {
         model: modelPath,
         n_ctx: tier === 'high' ? 4096 : 2048,
-        n_gpu_layers: 99, // Offload everything to GPU (Metal on iOS)
+        n_gpu_layers: 99,
         n_batch: tier === 'high' ? 512 : 256,
         use_mlock: true,
         use_mmap: true,
@@ -90,7 +89,6 @@ export async function chatCompletion(
 
   const { tier } = useModelStore.getState().deviceCapability;
 
-  // Prepend system prompt
   const fullMessages: ChatCompletionMessage[] = [
     { role: 'system', content: SYSTEM_PROMPT },
     ...messages,

@@ -48,6 +48,7 @@ export interface UserSettings {
   ttsPitch: number;
   autoSyncEnabled: boolean;
   darkMode: 'system' | 'light' | 'dark';
+  locale: string;
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
@@ -57,6 +58,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   ttsPitch: 1.0,
   autoSyncEnabled: true,
   darkMode: 'system',
+  locale: 'ko', // 기본 한국어
 };
 
 // ===== Voice Types =====

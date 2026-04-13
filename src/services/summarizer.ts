@@ -1,12 +1,12 @@
 import { chatCompletion, isLLMReady, type ChatCompletionMessage } from './llm';
 import type { ChatMessage } from '../types';
 
-const SUMMARIZE_PROMPT = `You are a helpful assistant that creates concise conversation summaries.
-Given the following conversation, create:
-1. A brief summary (2-3 sentences in Korean)
-2. The overall mood/emotion of the conversation (one word in Korean, e.g., 즐거움, 우울함, 평온함, 걱정, 기대)
+const SUMMARIZE_PROMPT = `대화를 간결하게 요약하는 어시스턴트야.
+다음 대화를 보고:
+1. 간단한 요약 (한국어 2-3문장)
+2. 전체 분위기/감정 (한국어 한 단어: 즐거움, 우울함, 평온함, 걱정, 기대 등)
 
-Format your response exactly as:
+반드시 다음 형식으로 답해:
 SUMMARY: [요약 내용]
 MOOD: [감정]`;
 

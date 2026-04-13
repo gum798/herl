@@ -3,11 +3,8 @@ import type { DeviceCapability, DeviceTier } from '../types';
 
 /**
  * Detect device capability tier based on available memory.
- * High tier: 8GB+ RAM -> EXAONE 2.4B + Whisper Small (quantized)
- * Low tier: <8GB RAM -> Qwen2.5 1.5B + Whisper Base
- *
- * NOTE: React Native doesn't expose RAM directly.
- * For production, use react-native-device-info.
+ * High tier: 8GB+ RAM -> Gemma 4 E4B + Whisper Small (quantized)
+ * Low tier: <8GB RAM -> Gemma 4 E2B + Whisper Base
  */
 export function getDeviceCapability(): DeviceCapability {
   const tier = estimateTier();
@@ -15,37 +12,34 @@ export function getDeviceCapability(): DeviceCapability {
   return {
     tier,
     totalMemoryGB: tier === 'high' ? 8 : 6,
-    modelId: tier === 'high' ? 'exaone-2.4b-q4' : 'qwen2.5-1.5b-q4',
+    modelId: tier === 'high' ? 'gemma4-e4b-q4' : 'gemma4-e2b-q4',
     whisperModel: tier === 'high' ? 'small-q5_1' : 'base',
   };
 }
 
 function estimateTier(): DeviceTier {
   if (Platform.OS === 'ios') {
-    // iPhone 15 Pro+ has 8GB RAM, A17 Pro -> high
-    // iPhone 13/14 has 4-6GB RAM -> low
-    // Default to 'low' until react-native-device-info is added
+    // iPhone 15 Pro+ (8GB RAM, A17 Pro) -> high
+    // iPhone 13/14 (4-6GB RAM) -> low
     return 'low';
   }
-
   if (Platform.OS === 'android') {
     return 'low';
   }
-
   return 'low';
 }
 
 /** Model info for UI display */
 export const MODEL_INFO: Record<string, { name: string; sizeGB: number; desc: string }> = {
-  'exaone-2.4b-q4': {
-    name: 'EXAONE 3.5 2.4B',
-    sizeGB: 1.64,
-    desc: 'LG AI - 한국어 최적화',
+  'gemma4-e4b-q4': {
+    name: 'Gemma 4 E4B',
+    sizeGB: 5.41,
+    desc: 'Google - 140+ 언어, 멀티모달',
   },
-  'qwen2.5-1.5b-q4': {
-    name: 'Qwen2.5 1.5B',
-    sizeGB: 1.12,
-    desc: 'Alibaba - 다국어 지원',
+  'gemma4-e2b-q4': {
+    name: 'Gemma 4 E2B',
+    sizeGB: 3.46,
+    desc: 'Google - 경량 모델, 다국어',
   },
   'small-q5_1': {
     name: 'Whisper Small Q5',

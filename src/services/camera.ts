@@ -1,10 +1,10 @@
-import { File, Paths } from 'expo-file-system';
+import { File as ExpoFile, Paths } from 'expo-file-system';
 
 /**
  * Convert an image file to base64 for LLM multimodal input.
  */
 export async function imageToBase64(imageUri: string): Promise<string> {
-  const file = new File(imageUri);
+  const file = new ExpoFile(imageUri);
   if (!file.exists) {
     throw new Error(`Image file not found: ${imageUri}`);
   }
@@ -15,7 +15,7 @@ export async function imageToBase64(imageUri: string): Promise<string> {
  * Get a temporary file path for camera capture.
  */
 export function getTempImagePath(): string {
-  const tempFile = new File(Paths.cache, `herl-capture-${Date.now()}.jpg`);
+  const tempFile = new ExpoFile(Paths.cache, `herl-capture-${Date.now()}.jpg`);
   return tempFile.uri;
 }
 
@@ -24,7 +24,7 @@ export function getTempImagePath(): string {
  */
 export function cleanupTempImage(uri: string): void {
   try {
-    const file = new File(uri);
+    const file = new ExpoFile(uri);
     if (file.exists) {
       file.delete();
     }
