@@ -19,7 +19,7 @@ export function ModelDownloadBanner({ onDownload }: ModelDownloadBannerProps) {
         const info = MODEL_INFO[deviceCapability.modelId];
         return {
           icon: 'download' as const,
-          title: 'AI Model Required',
+          title: 'AI 모델 필요',
           subtitle: info
             ? `${info.name} (${info.sizeGB}GB) - ${info.desc}`
             : `${deviceCapability.modelId}`,
@@ -29,22 +29,22 @@ export function ModelDownloadBanner({ onDownload }: ModelDownloadBannerProps) {
       case 'downloading':
         return {
           icon: 'cloud-download' as const,
-          title: `Downloading... ${llmProgress}%`,
-          subtitle: 'Please keep the app open',
+          title: `다운로드 중... ${llmProgress}%`,
+          subtitle: '앱을 열어두세요',
           showButton: false,
         };
       case 'loading':
         return {
           icon: 'cog' as const,
-          title: 'Loading model...',
-          subtitle: `Initializing ${llmProgress}%`,
+          title: '모델 로딩 중...',
+          subtitle: `초기화 ${llmProgress}%`,
           showButton: false,
         };
       case 'error':
         return {
           icon: 'exclamation-triangle' as const,
-          title: 'Model Error',
-          subtitle: 'Tap to retry download',
+          title: '모델 오류',
+          subtitle: '탭하여 다시 다운로드',
           showButton: true,
         };
       default:

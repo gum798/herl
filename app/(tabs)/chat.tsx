@@ -23,11 +23,13 @@ import { useCamera } from '@/src/hooks/useCamera';
 import { CameraViewComponent } from '@/src/components/CameraView';
 import { useChatStore } from '@/src/stores/chatStore';
 import { useSettingsStore } from '@/src/stores/settingsStore';
+import { useTranslation } from '@/src/i18n';
 import type { ChatMessage } from '@/src/types';
 
 export default function ChatScreen() {
   const { messages } = useChatStore();
   const { companionName } = useSettingsStore();
+  const { t } = useTranslation();
   const { sendMessage, stop, streamingText, isGenerating } = useLLM();
   const { voiceState, toggleRecording } = useVoiceRecorder();
   const {
@@ -108,10 +110,9 @@ export default function ChatScreen() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyEmoji}>{'  '}</Text>
-            <Text style={styles.emptyTitle}>Hi, I'm {companionName}</Text>
+            <Text style={styles.emptyTitle}>{t('chatEmpty', { name: companionName })}</Text>
             <Text style={styles.emptySubtext}>
-              Talk to me about anything.{'\n'}
-              I'm here to listen and help.
+              {t('chatEmptySubtext')}
             </Text>
           </View>
         }

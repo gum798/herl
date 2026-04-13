@@ -23,7 +23,7 @@ export function ChatInput({ onSend }: ChatInputProps) {
         style={styles.input}
         value={text}
         onChangeText={setText}
-        placeholder="Type a message..."
+        placeholder="메시지를 입력하세요..."
         placeholderTextColor="#666688"
         multiline
         maxLength={2000}

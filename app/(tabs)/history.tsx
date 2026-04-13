@@ -54,9 +54,9 @@ export default function HistoryScreen() {
       (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
     );
 
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffDays === 0) return '오늘';
+    if (diffDays === 1) return '어제';
+    if (diffDays < 7) return `${diffDays}일 전`;
 
     return date.toLocaleDateString('ko-KR', {
       month: 'short',
@@ -85,7 +85,7 @@ export default function HistoryScreen() {
       </Text>
       <View style={styles.cardFooter}>
         <FontAwesome name="comment-o" size={12} color="#666688" />
-        <Text style={styles.messageCount}>{item.messageCount} messages</Text>
+        <Text style={styles.messageCount}>{item.messageCount}개 메시지</Text>
       </View>
     </Pressable>
   );
@@ -115,9 +115,9 @@ export default function HistoryScreen() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <FontAwesome name="clock-o" size={48} color="#333355" />
-            <Text style={styles.emptyText}>No conversations yet</Text>
+            <Text style={styles.emptyText}>대화 기록 없음</Text>
             <Text style={styles.emptySubtext}>
-              Start chatting with HERL to see your{'\n'}conversation history here.
+              HERL과 대화를 시작하면{'\n'}여기에 기록이 표시됩니다.
             </Text>
           </View>
         }

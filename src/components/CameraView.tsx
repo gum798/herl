@@ -26,7 +26,7 @@ export function CameraViewComponent({
           <Pressable onPress={onClose} style={styles.iconButton}>
             <FontAwesome name="times" size={24} color="#ffffff" />
           </Pressable>
-          <Text style={styles.title}>What do you see?</Text>
+          <Text style={styles.title}>무엇이 보이나요?</Text>
           <Pressable onPress={onFlip} style={styles.iconButton}>
             <FontAwesome name="refresh" size={20} color="#ffffff" />
           </Pressable>

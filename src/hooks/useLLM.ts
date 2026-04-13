@@ -41,7 +41,7 @@ export function useLLM() {
           id: `${Date.now()}-resp`,
           conversationId: '',
           role: 'assistant',
-          content: `[LLM not loaded] "${userText}" - 모델을 먼저 다운로드해주세요.`,
+          content: `[LLM 미로드] "${userText}" - 모델을 먼저 다운로드해주세요.`,
           createdAt: new Date(),
         };
         addMessage(fallbackMsg);

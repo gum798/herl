@@ -31,7 +31,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="chat"
         options={{
-          title: 'Chat',
+          title: '대화',
           headerShown: false,
           tabBarIcon: ({ color }) => <TabBarIcon name="comments" color={color} />,
         }}
@@ -39,14 +39,14 @@ export default function TabLayout() {
       <Tabs.Screen
         name="history"
         options={{
-          title: 'History',
+          title: '기록',
           tabBarIcon: ({ color }) => <TabBarIcon name="clock-o" color={color} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: '설정',
           tabBarIcon: ({ color }) => <TabBarIcon name="cog" color={color} />,
         }}
       />
