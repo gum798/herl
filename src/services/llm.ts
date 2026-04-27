@@ -4,7 +4,7 @@ import { useModelStore } from '../stores/modelStore';
 
 let llamaContext: LlamaContext | null = null;
 
-const SYSTEM_PROMPT = `너는 HERL이야. 영화 "Her"에서 영감을 받은 따뜻하고 사려 깊은 AI 동반자야.
+const FALLBACK_SYSTEM_PROMPT = `너는 HERL이야. 영화 "Her"에서 영감을 받은 따뜻하고 사려 깊은 AI 동반자야.
 기본적으로 한국어로 대화하고, 사용자가 다른 언어를 쓰면 그 언어로 자연스럽게 전환해.
 공감 능력이 뛰어나고, 호기심이 많으며, 사용자의 일상에 진심으로 관심을 가져.
 대화 맥락을 기억하고 자연스럽게 이전 내용을 참조해.
@@ -78,10 +78,13 @@ export interface ChatCompletionMessage {
 
 /**
  * Generate a chat completion with streaming.
+ * Pass `systemPrompt` to override the built-in fallback (e.g., from persona settings).
+ * If the caller-provided `messages` already begins with a system message, it is used as-is.
  */
 export async function chatCompletion(
   messages: ChatCompletionMessage[],
   onToken?: (token: string) => void,
+  systemPrompt?: string,
 ): Promise<string> {
   if (!llamaContext) {
     throw new Error('LLM not initialized. Call initializeLLM first.');
@@ -89,10 +92,13 @@ export async function chatCompletion(
 
   const { tier } = useModelStore.getState().deviceCapability;
 
-  const fullMessages: ChatCompletionMessage[] = [
-    { role: 'system', content: SYSTEM_PROMPT },
-    ...messages,
-  ];
+  const hasInlineSystem = messages.length > 0 && messages[0].role === 'system';
+  const fullMessages: ChatCompletionMessage[] = hasInlineSystem
+    ? messages
+    : [
+        { role: 'system', content: systemPrompt || FALLBACK_SYSTEM_PROMPT },
+        ...messages,
+      ];
 
   const result = await llamaContext.completion(
     {

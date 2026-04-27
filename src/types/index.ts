@@ -41,8 +41,18 @@ export interface ModelState {
 }
 
 // ===== Settings Types =====
+export type PersonaPresetId =
+  | 'default'
+  | 'friendly'
+  | 'mentor'
+  | 'witty'
+  | 'counselor'
+  | 'custom';
+
 export interface UserSettings {
   companionName: string;
+  personaPresetId: PersonaPresetId;
+  personaCustomPrompt: string;
   ttsVoice: string;
   ttsRate: number;
   ttsPitch: number;
@@ -53,6 +63,8 @@ export interface UserSettings {
 
 export const DEFAULT_SETTINGS: UserSettings = {
   companionName: '헐',
+  personaPresetId: 'default',
+  personaCustomPrompt: '',
   ttsVoice: 'default',
   ttsRate: 0.5,
   ttsPitch: 1.0,

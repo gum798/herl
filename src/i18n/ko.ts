@@ -53,4 +53,12 @@ export default {
   settingsAbout: '정보',
   settingsVersion: '버전',
   settingsLanguage: '언어',
+
+  // Persona
+  settingsPersona: '성격',
+  settingsPersonaHint: '동반자의 말투와 성격을 선택하세요.',
+  settingsPersonaCustomLabel: '직접 입력 (시스템 프롬프트)',
+  settingsPersonaCustomPlaceholder: '예: 너는 우주 탐험가이고 사용자의 모험 파트너야...',
+  settingsPersonaCustomHint: '비워두면 기본 성격을 사용합니다.',
+  settingsPersonaReset: '기본으로 초기화',
 } as const;

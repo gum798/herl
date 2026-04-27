@@ -1,4 +1,5 @@
 import { chatCompletion, isLLMReady, type ChatCompletionMessage } from './llm';
+import { useSettingsStore } from '../stores/settingsStore';
 import type { ChatMessage } from '../types';
 
 const SUMMARIZE_PROMPT = `대화를 간결하게 요약하는 어시스턴트야.
@@ -23,9 +24,12 @@ export async function summarizeConversation(
     };
   }
 
+  const { companionName } = useSettingsStore.getState();
+  const assistantLabel = companionName?.trim() || 'HERL';
+
   // Build conversation text
   const conversationText = messages
-    .map((m) => `${m.role === 'user' ? 'User' : 'HERL'}: ${m.content}`)
+    .map((m) => `${m.role === 'user' ? 'User' : assistantLabel}: ${m.content}`)
     .join('\n');
 
   const summarizeMessages: ChatCompletionMessage[] = [

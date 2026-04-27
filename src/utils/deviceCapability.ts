@@ -1,5 +1,19 @@
 import { Platform } from 'react-native';
+import Constants from 'expo-constants';
 import type { DeviceCapability, DeviceTier } from '../types';
+
+/**
+ * Returns true when the app is running in an iOS Simulator or Android Emulator.
+ * Used to switch to mock-LLM mode (real GGUF models don't fit in a simulator).
+ */
+export function isSimulator(): boolean {
+  // Constants.isDevice: false on simulator/emulator, true on real devices.
+  // Cast because the typings vary across expo-constants versions.
+  const isDevice = (Constants as unknown as { isDevice?: boolean }).isDevice;
+  if (typeof isDevice === 'boolean') return !isDevice;
+  // Fallback: treat __DEV__ on ios/android as unknown — assume real device.
+  return false;
+}
 
 /**
  * Detect device capability tier based on available memory.

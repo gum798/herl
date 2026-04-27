@@ -1,6 +1,6 @@
 import { supabase } from './supabase';
 import { summarizeConversation } from './summarizer';
-import type { ChatMessage, Conversation } from '../types';
+import type { ChatMessage, Conversation, PersonaPresetId } from '../types';
 
 /**
  * Save a conversation to Supabase.
@@ -106,6 +106,75 @@ export async function fetchConversations(
   } catch (error) {
     console.error('Fetch error:', error);
     return [];
+  }
+}
+
+/**
+ * Upsert the user's persona settings to Supabase profiles.
+ * No-op when the user is not authenticated.
+ */
+export async function savePersonaToCloud(params: {
+  companionName: string;
+  personaPresetId: PersonaPresetId;
+  personaCustomPrompt: string;
+}): Promise<boolean> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+
+    const { error } = await supabase
+      .from('profiles')
+      .upsert(
+        {
+          id: user.id,
+          companion_name: params.companionName,
+          persona_preset_id: params.personaPresetId,
+          persona_custom_prompt: params.personaCustomPrompt,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'id' },
+      );
+
+    if (error) {
+      console.error('Failed to save persona:', error);
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('savePersonaToCloud error:', error);
+    return false;
+  }
+}
+
+/**
+ * Fetch the user's persona settings from Supabase.
+ * Returns null when not authenticated or on error.
+ */
+export async function loadPersonaFromCloud(): Promise<{
+  companionName: string;
+  personaPresetId: PersonaPresetId;
+  personaCustomPrompt: string;
+} | null> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('companion_name, persona_preset_id, persona_custom_prompt')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (error || !data) return null;
+
+    return {
+      companionName: data.companion_name ?? 'HERL',
+      personaPresetId: (data.persona_preset_id ?? 'default') as PersonaPresetId,
+      personaCustomPrompt: data.persona_custom_prompt ?? '',
+    };
+  } catch (error) {
+    console.error('loadPersonaFromCloud error:', error);
+    return null;
   }
 }
 

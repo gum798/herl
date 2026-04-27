@@ -53,4 +53,12 @@ export default {
   settingsAbout: 'About',
   settingsVersion: 'Version',
   settingsLanguage: 'Language',
+
+  // Persona
+  settingsPersona: 'Personality',
+  settingsPersonaHint: 'Choose how your companion talks and behaves.',
+  settingsPersonaCustomLabel: 'Custom (system prompt)',
+  settingsPersonaCustomPlaceholder: 'e.g., You are a space explorer and my adventure partner...',
+  settingsPersonaCustomHint: 'Leave empty to use the default personality.',
+  settingsPersonaReset: 'Reset to default',
 } as const;

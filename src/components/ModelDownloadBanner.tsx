@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, Pressable, ActivityIndicator } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useModelStore } from '../stores/modelStore';
-import { MODEL_INFO } from '../utils/deviceCapability';
+import { MODEL_INFO, isSimulator } from '../utils/deviceCapability';
 
 interface ModelDownloadBannerProps {
   onDownload: () => void;
@@ -13,7 +13,18 @@ export function ModelDownloadBanner({ onDownload }: ModelDownloadBannerProps) {
 
   if (llmStatus === 'ready') return null;
 
+  // Simulator has no real GGUF runtime — show a mock-mode banner instead of download prompt.
+  const simulator = isSimulator();
+
   const getStatusContent = () => {
+    if (simulator && llmStatus === 'not_downloaded') {
+      return {
+        icon: 'flask' as const,
+        title: '시뮬레이터 모드',
+        subtitle: '페르소나 목업 응답으로 동작 (실기기에서 실제 LLM)',
+        showButton: false,
+      };
+    }
     switch (llmStatus) {
       case 'not_downloaded': {
         const info = MODEL_INFO[deviceCapability.modelId];

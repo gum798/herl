@@ -6,6 +6,9 @@ import {
   type ChatCompletionMessage,
 } from '../services/llm';
 import { useChatStore } from '../stores/chatStore';
+import { useSettingsStore } from '../stores/settingsStore';
+import { resolveSystemPrompt } from '../services/personas';
+import { generateMockReply, streamMockTokens } from '../services/mockLLM';
 import type { ChatMessage } from '../types';
 
 /**
@@ -25,7 +28,8 @@ export function useLLM() {
   const sendMessage = useCallback(
     async (userText: string, imageUri?: string) => {
       if (!isLLMReady()) {
-        // Fallback: echo message when LLM not loaded
+        // Mock fallback: persona-aware canned response with simulated streaming.
+        // Used on simulator or before the real GGUF model finishes loading.
         const userMsg: ChatMessage = {
           id: `${Date.now()}`,
           conversationId: '',
@@ -37,14 +41,45 @@ export function useLLM() {
         };
         addMessage(userMsg);
 
-        const fallbackMsg: ChatMessage = {
-          id: `${Date.now()}-resp`,
-          conversationId: '',
-          role: 'assistant',
-          content: `[LLM 미로드] "${userText}" - 모델을 먼저 다운로드해주세요.`,
-          createdAt: new Date(),
-        };
-        addMessage(fallbackMsg);
+        abortRef.current = false;
+        setIsGenerating(true);
+        setIsTyping(true);
+        setStreamingText('');
+
+        const { companionName, personaPresetId, personaCustomPrompt } =
+          useSettingsStore.getState();
+        const mockReply = generateMockReply({
+          userText,
+          presetId: personaPresetId,
+          customPrompt: personaCustomPrompt,
+          companionName,
+        });
+
+        let accumulated = '';
+        await streamMockTokens(
+          mockReply,
+          (chunk) => {
+            if (abortRef.current) return;
+            accumulated += chunk;
+            setStreamingText(accumulated);
+          },
+          () => abortRef.current,
+        );
+
+        if (!abortRef.current) {
+          const assistantMsg: ChatMessage = {
+            id: `${Date.now()}-mock`,
+            conversationId: '',
+            role: 'assistant',
+            content: mockReply,
+            createdAt: new Date(),
+          };
+          addMessage(assistantMsg);
+        }
+
+        setIsGenerating(false);
+        setIsTyping(false);
+        setStreamingText('');
         return;
       }
 
@@ -75,11 +110,23 @@ export function useLLM() {
 
         let accumulated = '';
 
-        const fullResponse = await chatCompletion(chatHistory, (token) => {
-          if (abortRef.current) return;
-          accumulated += token;
-          setStreamingText(accumulated);
-        });
+        const { companionName, personaPresetId, personaCustomPrompt } =
+          useSettingsStore.getState();
+        const systemPrompt = resolveSystemPrompt(
+          personaPresetId,
+          personaCustomPrompt,
+          companionName,
+        );
+
+        const fullResponse = await chatCompletion(
+          chatHistory,
+          (token) => {
+            if (abortRef.current) return;
+            accumulated += token;
+            setStreamingText(accumulated);
+          },
+          systemPrompt,
+        );
 
         // Add assistant response
         if (!abortRef.current) {
